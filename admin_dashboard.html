@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+
+<style>
+
+/* ===== BASE ===== */
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f6f8;
+}
+
+/* ===== HEADER ===== */
+header{
+    background:#0a3d62;
+    color:white;
+    padding:14px 20px;
+    font-size:20px;
+}
+
+marquee{
+    background:#08324f;
+    color:white;
+    padding:6px;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+    display:flex;
+    height:calc(100vh - 86px);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    width:270px;
+    background:#1e272e;
+    color:white;
+}
+
+/* ===== PROFILE ===== */
+.profile{
+    padding:20px 16px;
+    text-align:center;
+    border-bottom:1px solid #444;
+}
+
+.profile img{
+    width:100px;              /* Slightly bigger */
+    height:100px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:10px;
+}
+
+.profile-name{
+    font-size:16px;
+    font-weight:bold;
+}
+
+/* ===== MENU ===== */
+.menu{
+    padding:14px 20px;
+    cursor:pointer;
+    border-bottom:1px solid #444;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.menu:hover{
+    background:#485460;
+}
+
+.submenu{
+    display:none;
+    background:#2f3640;
+}
+
+.submenu div{
+    padding:12px 40px;
+    cursor:pointer;
+}
+
+.submenu div:hover{
+    background:#485460;
+}
+
+/* ===== CONTENT ===== */
+.content{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+
+/* ===== NOTICE CARD (MATCHED WITH FACULTY) ===== */
+.notice{
+    background:#145a7c;
+    color:white;
+    padding:18px;
+    border-radius:12px;
+    margin-bottom:22px;
+    width:100%;
+    max-width:1200px;
+}
+
+.notice b{
+    font-size:18px;
+}
+
+.file-title{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+/* Image */
+.thumb{
+    max-width:260px;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+/* Buttons */
+.btn{
+    display:inline-block;
+    padding:6px 14px;
+    background:#303030;
+    color:white;
+    border:none;
+    border-radius:5px;
+    margin-top:10px;
+    margin-right:8px;
+    cursor:pointer;
+    text-decoration:none;
+}
+
+.admin-btn{
+    background:#c0392b;
+}
+
+/* ===== MODAL ===== */
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.modal-box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    max-width:90%;
+    max-height:90%;
+}
+
+.modal-box img,
+.modal-box iframe{
+    max-width:85vw;
+    max-height:70vh;
+    border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>👨‍💼 ADMIN DASHBOARD</header>
+<marquee>Administration – Control all notices for Students & Faculty 📢</marquee>
+
+<div class="container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="profile">
+        <img src="https://i.imgur.com/6VBx3io.png">
+        <div class="profile-name" id="adminName">Admin</div>
+    </div>
+
+    <div class="menu" onclick="toggleMenu('eventsMenu')">
+        <span>Events</span>
+        <span>▼</span>
+    </div>
+
+    <div class="submenu" id="eventsMenu">
+        <div onclick="openCategory('events','hackathon')">Hackathon</div>
+        <div onclick="openCategory('events','clubs')">Clubs</div>
+        <div onclick="openCategory('events','seminars')">Seminars</div>
+        <div onclick="openCategory('events','guestlectures')">Guest Lectures</div>
+    </div>
+
+    <div class="menu" onclick="openCategory('faculty','meeting')">
+        Faculty Meetings
+    </div>
+
+    <div class="menu" onclick="openCategory('faculty','examduty')">
+        Examination Duty
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content">
+    <h2>Select a category from the left</h2>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="previewModal" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" id="modalContent"></div>
+</div>
+
+<script>
+
+/* ===== SET LOGGED IN USER NAME ===== */
+window.onload = function(){
+    let user = localStorage.getItem("loggedInUser");
+
+    if(user){
+        document.getElementById("adminName").innerText = user;
+    } else {
+        document.getElementById("adminName").innerText = "AdminUser";
+    }
+}
+
+/* ===== TOGGLE MENU ===== */
+function toggleMenu(id){
+    let el=document.getElementById(id);
+    el.style.display = el.style.display==="block" ? "none" : "block";
+}
+
+/* ===== STORAGE KEY ===== */
+function storageKey(main,sub){
+    return `notices_${main}_${sub}`;
+}
+
+/* ===== OPEN CATEGORY ===== */
+function openCategory(main,sub){
+    let key = storageKey(main,sub);
+    let data = JSON.parse(localStorage.getItem(key)) || [];
+
+    let html = `<h2>${main.toUpperCase()} → ${sub.toUpperCase()}</h2><br>
+    <button class="btn" onclick="addNotice('${main}','${sub}')">+ Add Notice</button><br><br>`;
+
+    if(data.length === 0){
+        document.getElementById("content").innerHTML = html + "<p>No notices available.</p>";
+        return;
+    }
+
+    data.forEach((n,i)=>{
+        html += `
+        <div class="notice">
+            <b>${n.text}</b><br>
+            📅 ${n.date}
+
+            ${renderFile(n)}
+
+            <br>
+            <button class="btn admin-btn" onclick="deleteNotice('${main}','${sub}',${i})">Delete</button>
+        </div>`;
+    });
+
+    document.getElementById("content").innerHTML = html;
+}
+
+/* ===== FILE RENDER ===== */
+function renderFile(n){
+    if(!n.fileData) return "";
+
+    if(n.fileType && n.fileType.startsWith("image")){
+        return `
+        <div class="file-title">${n.fileName}</div>
+        <img src="${n.fileData}" class="thumb"><br>
+        <button class="btn" onclick="previewImage('${n.fileData}')">Open</button>
+        <a class="btn" href="${n.fileData}" download="${n.fileName}">Download</a>
+        `;
+    }
+
+    return `
+    <div class="file-title">📄 ${n.fileName}</div>
+    <button class="btn" onclick="previewFile('${n.fileData}')">Open</button>
+    <a class="btn" href="${n.fileData}" download="${n.fileName}">Download</a>
+    `;
+}
+
+/* ===== ADD NOTICE ===== */
+function addNotice(main,sub){
+    let text = prompt("Enter notice text:");
+    if(!text) return;
+
+    let date = prompt("Enter date (YYYY-MM-DD):");
+    if(!date) return;
+
+    let data = JSON.parse(localStorage.getItem(storageKey(main,sub))) || [];
+    data.unshift({text,date,fileData:"",fileType:"",fileName:""});
+    localStorage.setItem(storageKey(main,sub),JSON.stringify(data));
+    openCategory(main,sub);
+}
+
+/* ===== DELETE ===== */
+function deleteNotice(main,sub,index){
+    let data = JSON.parse(localStorage.getItem(storageKey(main,sub)));
+    data.splice(index,1);
+    localStorage.setItem(storageKey(main,sub),JSON.stringify(data));
+    openCategory(main,sub);
+}
+
+/* ===== PREVIEW ===== */
+function previewImage(src){
+    document.getElementById("modalContent").innerHTML = `<img src="${src}">`;
+    document.getElementById("previewModal").style.display="flex";
+}
+
+function previewFile(src){
+    document.getElementById("modalContent").innerHTML =
+        `<iframe src="${src}" width="800" height="500"></iframe>`;
+    document.getElementById("previewModal").style.display="flex";
+}
+
+function closeModal(){
+    document.getElementById("previewModal").style.display="none";
+}
+
+</script>
+
+</body>
+</html>

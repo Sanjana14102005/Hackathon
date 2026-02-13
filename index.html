@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digital Notice Board - Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e272e, #0a3d62);
+            color: white;
+            text-align: center;
+        }
+
+        .marquee {
+            background: #000;
+            padding: 12px;
+            font-size: 22px;
+        }
+
+        .logo {
+            margin: 30px 0;
+        }
+
+        .logo img {
+            width: 120px;
+        }
+
+        .login-box {
+            background: white;
+            color: black;
+            width: 350px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #0a3d62;
+            color: white;
+        }
+
+        .login-box button:hover {
+            background: #0652DD;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="marquee">
+    <marquee>🏫 ABC ENGINEERING COLLEGE - DIGITAL NOTICE BOARD</marquee>
+</div>
+
+<div class="logo">
+    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942849.png">
+</div>
+
+<div class="login-box">
+    <h2>Login As</h2>
+    <button onclick="location.href='admin_login.html'">Admin Login</button>
+    <button onclick="location.href='faculty_login.html'">Faculty Login</button>
+    <button onclick="location.href='student_login.html'">Student Login</button>
+</div>
+
+</body>
+</html>
